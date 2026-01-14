@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Link Rút Gọn</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        h1 {
+            color: #007bff;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 60px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+        .link-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Link Generator</h1>
+    <p>Nhấn nút để lấy một link ngẫu nhiên từ tất cả 4 sheet.</p>
+    <button onclick="getRandomLink()">Lấy Link Ngẫu Nhiên</button>
+    <button onclick="refreshData()">Tải lại Dữ liệu</button>
+    <div id="result" class="loading">Đang tải dữ liệu từ 4 sheet...</div>
+
+    <script>
+        const sheetId = '1wZfmp2X1lCxUyizuIhag7-leS-yxPoQsfpTUuCI0aP0';
+        
+        // Danh sách gid của 4 sheet bạn cung cấp
+        const sheetGids = [
+            '0',            // Sheet 1
+            '1297509997',   // Sheet 2
+            '427664695',    // Sheet 3
+            '18020374'      // Sheet 4
+        ];
+        
+        let allLinks = [];
+        let loadingComplete = false;
+
+        // Hàm fetch dữ liệu từ một sheet cụ thể
+        async function fetchSheetData(gid, sheetIndex) {
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+            
+            try {
+                const response = await fetch(csvUrl);
+                if (!response.ok) {
+                    throw new Error(`Không thể tải sheet ${sheetIndex + 1}`);
+                }
+                const data = await response.text();
+                return {
+                    success: true,
+                    data: data,
+                    sheetIndex: sheetIndex,
+                    gid: gid
+                };
+            } catch (error) {
+                console.error(`Lỗi khi tải sheet ${sheetIndex + 1} (gid=${gid}):`, error);
+                return {
+                    success: false,
+                    error: error.message,
+                    sheetIndex: sheetIndex,
+                    gid: gid
+                };
+            }
+        }
+
+        // Hàm xử lý dữ liệu từ một sheet
+        function processSheetData(result) {
+            if (!result.success || !result.data) return [];
+            
+            const rows = result.data.split('\n');
+            const sheetLinks = [];
+            
+            // Bỏ qua hàng tiêu đề (hàng đầu tiên)
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i].trim();
+                if (!row) continue;
+                
+                // Xử lý CSV: chia các cột bằng dấu phẩy
+                const columns = row.split(',');
+                let link = columns[0] ? columns[0].trim() : '';
+                
+                // Xóa dấu ngoặc kép nếu có
+                if (link.startsWith('"') && link.endsWith('"')) {
+                    link = link.substring(1, link.length - 1);
+                }
+                
+                // Kiểm tra link hợp lệ
+                if (link && 
+                    (link.startsWith('http://') || 
+                     link.startsWith('https://') ||
+                     link.startsWith('www.') ||
+                     (link.includes('.') && link.length > 5))) {
+                    
+                    // Thêm protocol nếu thiếu
+                    if (!link.startsWith('http')) {
+                        link = 'https://' + link;
+                    }
+                    
+                    sheetLinks.push(link);
+                }
+            }
+            
+            return sheetLinks;
+        }
+
+        // Tải dữ liệu từ tất cả sheet
+        async function loadAllSheets() {
+            document.getElementById('result').innerHTML = '<div class="loading">Đang tải dữ liệu từ 4 sheet...</div>';
+            
+            const promises = sheetGids.map((gid, index) => 
+                fetchSheetData(gid, index)
+            );
+            
+            try {
+                const results = await Promise.all(promises);
+                
+                allLinks = [];
+                let successCount = 0;
+                let totalLinks = 0;
+                
+                results.forEach(result => {
+                    if (result.success) {
+                        const sheetLinks = processSheetData(result);
+                        allLinks = allLinks.concat(sheetLinks);
+                        successCount++;
+                        totalLinks += sheetLinks.length;
+                    }
+                });
+                
+                console.log(`Tổng cộng: ${totalLinks} link từ ${successCount}/4 sheet thành công`);
+                
+                if (allLinks.length === 0) {
+                    document.getElementById('result').innerHTML = 
+                        '<div class="error">Không tìm thấy link nào trong các sheet.</div>';
+                    loadingComplete = false;
+                } else {
+                    document.getElementById('result').innerHTML = 
+                        `<div class="success">Đã tải ${totalLinks} link thành công!</div>
+                         <div class="loading">Nhấn "Lấy Link Ngẫu Nhiên" để bắt đầu.</div>`;
+                    loadingComplete = true;
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+                document.getElementById('result').innerHTML = 
+                    `<div class="error">Lỗi khi tải dữ liệu: ${error.message}</div>`;
+                loadingComplete = false;
+            }
+        }
+
+        // Lấy link ngẫu nhiên
+        function getRandomLink() {
+            if (!loadingComplete) {
+                document.getElementById('result').innerHTML = 
+                    '<div class="loading">Đang tải dữ liệu... Vui lòng đợi hoặc nhấn "Tải lại Dữ liệu".</div>';
+                return;
+            }
+            
+            if (allLinks.length === 0) {
+                document.getElementById('result').innerHTML = 
+                    '<div class="error">Không có link nào để chọn. Vui lòng nhấn "Tải lại Dữ liệu".</div>';
+                return;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * allLinks.length);
+            const randomLink = allLinks[randomIndex];
+            
+            document.getElementById('result').innerHTML = 
+                `<div class="link-container">
+                    <a href="${randomLink}" target="_blank">${randomLink}</a>
+                </div>`;
+        }
+
+        // Làm mới dữ liệu
+        function refreshData() {
+            loadingComplete = false;
+            loadAllSheets();
+        }
+
+        // Tự động tải dữ liệu khi trang được tải
+        window.onload = function() {
+            loadAllSheets();
+        };
+    </script>
+</body>
+</html>

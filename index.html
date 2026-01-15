@@ -24,7 +24,7 @@
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
-            margin: 20px 0;
+            margin: 20px 5px;
         }
         button:hover {
             background-color: #0056b3;
@@ -60,19 +60,27 @@
             max-width: 600px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+        .info {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <h1>Random Link Generator</h1>
-    <p>Nhấn nút để lấy một link ngẫu nhiên từ tất cả 4 sheet.</p>
-    <button onclick="getRandomLink()">Lấy Link Ngẫu Nhiên</button>
-    <button onclick="refreshData()">Tải lại Dữ liệu</button>
+    <p>Nhấn nút để lấy một link ngẫu nhiên từ từng sheet theo thứ tự</p>
+    <div>
+        <button onclick="getNextRandomLink()">Lấy Link Ngẫu Nhiên</button>
+        <button onclick="refreshData()">Tải lại Dữ liệu</button>
+    </div>
     <div id="result" class="loading">Đang tải dữ liệu từ 4 sheet...</div>
+    <div id="sequence-info" class="info"></div>
 
     <script>
         const sheetId = '1wZfmp2X1lCxUyizuIhag7-leS-yxPoQsfpTUuCI0aP0';
         
-        // Danh sách gid của 4 sheet bạn cung cấp
+        // Danh sách gid của 4 sheet
         const sheetGids = [
             '0',            // Sheet 1
             '1297509997',   // Sheet 2
@@ -80,8 +88,19 @@
             '18020374'      // Sheet 4
         ];
         
-        let allLinks = [];
+        // Tên sheet để hiển thị
+        const sheetNames = [
+            'Sheet 1',
+            'Sheet 2', 
+            'Sheet 3',
+            'Sheet 4'
+        ];
+        
+        // Lưu trữ link từ từng sheet riêng biệt
+        let sheetLinks = [];
         let loadingComplete = false;
+        let currentSheetIndex = 0;
+        let clickCount = 0;
 
         // Hàm fetch dữ liệu từ một sheet cụ thể
         async function fetchSheetData(gid, sheetIndex) {
@@ -161,30 +180,36 @@
             try {
                 const results = await Promise.all(promises);
                 
-                allLinks = [];
+                sheetLinks = [];
                 let successCount = 0;
                 let totalLinks = 0;
                 
                 results.forEach(result => {
+                    const sheetIndex = result.sheetIndex;
                     if (result.success) {
-                        const sheetLinks = processSheetData(result);
-                        allLinks = allLinks.concat(sheetLinks);
+                        const links = processSheetData(result);
+                        sheetLinks[sheetIndex] = links;
                         successCount++;
-                        totalLinks += sheetLinks.length;
+                        totalLinks += links.length;
+                    } else {
+                        sheetLinks[sheetIndex] = [];
                     }
                 });
                 
                 console.log(`Tổng cộng: ${totalLinks} link từ ${successCount}/4 sheet thành công`);
                 
-                if (allLinks.length === 0) {
+                if (totalLinks === 0) {
                     document.getElementById('result').innerHTML = 
                         '<div class="error">Không tìm thấy link nào trong các sheet.</div>';
                     loadingComplete = false;
                 } else {
                     document.getElementById('result').innerHTML = 
-                        `<div class="success">Đã tải ${totalLinks} link thành công!</div>
+                        `<div class="success">Đã tải ${totalLinks} link từ ${successCount} sheet thành công!</div>
                          <div class="loading">Nhấn "Lấy Link Ngẫu Nhiên" để bắt đầu.</div>`;
                     loadingComplete = true;
+                    
+                    // Hiển thị thông tin số lượng link trong từng sheet
+                    updateSequenceInfo();
                 }
             } catch (error) {
                 console.error('Lỗi khi tải dữ liệu:', error);
@@ -194,32 +219,77 @@
             }
         }
 
-        // Lấy link ngẫu nhiên
-        function getRandomLink() {
+        // Lấy link ngẫu nhiên từ sheet tiếp theo
+        function getNextRandomLink() {
             if (!loadingComplete) {
                 document.getElementById('result').innerHTML = 
                     '<div class="loading">Đang tải dữ liệu... Vui lòng đợi hoặc nhấn "Tải lại Dữ liệu".</div>';
                 return;
             }
             
-            if (allLinks.length === 0) {
-                document.getElementById('result').innerHTML = 
-                    '<div class="error">Không có link nào để chọn. Vui lòng nhấn "Tải lại Dữ liệu".</div>';
-                return;
+            let attempts = 0;
+            let foundLink = false;
+            
+            // Tìm sheet có link
+            while (attempts < sheetLinks.length) {
+                const links = sheetLinks[currentSheetIndex];
+                
+                if (links && links.length > 0) {
+                    // Lấy link ngẫu nhiên từ sheet hiện tại
+                    const randomIndex = Math.floor(Math.random() * links.length);
+                    const randomLink = links[randomIndex];
+                    
+                    document.getElementById('result').innerHTML = 
+                        `<div class="link-container">
+                            <a href="${randomLink}" target="_blank">${randomLink}</a>
+                        </div>`;
+                    
+                    // Tăng số lần click và cập nhật sheet tiếp theo
+                    clickCount++;
+                    
+                    // Chuyển đến sheet tiếp theo
+                    currentSheetIndex = (currentSheetIndex + 1) % sheetLinks.length;
+                    foundLink = true;
+                    break;
+                } else {
+                    // Sheet này không có link, chuyển sang sheet tiếp theo
+                    currentSheetIndex = (currentSheetIndex + 1) % sheetLinks.length;
+                    attempts++;
+                }
             }
             
-            const randomIndex = Math.floor(Math.random() * allLinks.length);
-            const randomLink = allLinks[randomIndex];
+            if (!foundLink) {
+                document.getElementById('result').innerHTML = 
+                    '<div class="error">Không tìm thấy link nào trong tất cả các sheet.</div>';
+                // Reset về sheet đầu tiên
+                currentSheetIndex = 0;
+            }
             
-            document.getElementById('result').innerHTML = 
-                `<div class="link-container">
-                    <a href="${randomLink}" target="_blank">${randomLink}</a>
-                </div>`;
+            updateSequenceInfo();
+        }
+
+        // Cập nhật thông tin trình tự
+        function updateSequenceInfo() {
+            let infoHtml = `<div class="info">`;
+            
+            for (let i = 0; i < sheetLinks.length; i++) {
+                const linkCount = sheetLinks[i] ? sheetLinks[i].length : 0;
+                const isCurrent = (i === currentSheetIndex);
+                
+                infoHtml += `<span style="margin: 0 10px; ${isCurrent ? 'font-weight: bold; color: #007bff;' : ''}">
+                    ${sheetNames[i]}: ${linkCount} link
+                </span>`;
+            }
+            
+            infoHtml += `<br>Lần click tiếp theo: ${sheetNames[currentSheetIndex]}</div>`;
+            document.getElementById('sequence-info').innerHTML = infoHtml;
         }
 
         // Làm mới dữ liệu
         function refreshData() {
             loadingComplete = false;
+            currentSheetIndex = 0;
+            clickCount = 0;
             loadAllSheets();
         }
 

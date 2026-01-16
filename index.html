@@ -3,79 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Link Rút Gọn</title>
+    <title>ANIME LINK COLLECTION</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Hiệu ứng hoa anh đào rơi - Giảm mật độ */
+        .sakura {
+            position: fixed;
+            top: -10px;
+            color: #ffb7c5;
+            font-size: 16px; /* Giảm kích thước hoa */
+            text-shadow: 0 0 3px #ff69b4;
+            user-select: none;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.7; /* Giảm độ mờ */
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Container chính */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
             text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            position: relative;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            border-radius: 15px;
+            border: 2px solid #4a00e0;
+            box-shadow: 0 0 20px rgba(74, 0, 224, 0.3);
         }
-        h1 {
-            color: #007bff;
+
+        .header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(45deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(252, 0, 255, 0.3);
         }
-        button {
-            background-color: #007bff;
+
+        .header p {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Nút loading */
+        .loading-btn {
+            display: block;
+            margin: 20px auto 30px;
+            padding: 12px 35px;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
+            border-radius: 50px;
             cursor: pointer;
-            border-radius: 5px;
-            margin: 20px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        .loading-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(106, 17, 203, 0.6);
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
         }
-        #result {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            min-height: 60px;
+
+        .loading-btn:active {
+            transform: translateY(1px);
         }
-        a {
-            color: #007bff;
-            text-decoration: none;
+
+        .loading-btn i {
+            margin-right: 10px;
+            animation: spin 2s linear infinite;
         }
-        a:hover {
-            text-decoration: underline;
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .loading {
-            color: #666;
-            font-style: italic;
+
+        /* Menu sheet */
+        .sheet-menu {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 40px;
         }
-        .error {
-            color: #dc3545;
-        }
-        .success {
-            color: #28a745;
-        }
-        .link-container {
-            background-color: white;
+
+        .sheet-btn {
+            padding: 12px 25px;
+            background: rgba(26, 26, 46, 0.8);
+            color: #a0a0c0;
+            border: 2px solid #2d2d4d;
             border-radius: 10px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 600px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .info {
-            color: #6c757d;
-            font-size: 14px;
-            margin-top: 10px;
+
+        .sheet-btn:hover {
+            background: rgba(45, 45, 77, 0.8);
+            border-color: #4a00e0;
+            color: #e0e0e0;
+        }
+
+        .sheet-btn.active {
+            background: linear-gradient(45deg, #4a00e0, #8e2de2);
+            border-color: #8e2de2;
+            color: white;
+            box-shadow: 0 0 15px rgba(142, 45, 226, 0.5);
+        }
+
+        .sheet-count {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+
+        /* Container link */
+        .links-container {
+            background: rgba(26, 26, 46, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #2d2d4d;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .links-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4a00e0, #8e2de2, #4a00e0);
+        }
+
+        .link-item {
+            background: rgba(45, 45, 77, 0.5);
+            border-left: 4px solid #4a00e0;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-item:hover {
+            background: rgba(74, 0, 224, 0.1);
+            border-left-color: #8e2de2;
+            transform: translateX(5px);
+        }
+
+        .link-item a {
+            color: #8e2de2;
+            text-decoration: none;
+            font-size: 1.1rem;
+            flex-grow: 1;
+            word-break: break-all;
+            padding-right: 15px;
+        }
+
+        .link-item a:hover {
+            color: #fc00ff;
+            text-shadow: 0 0 5px rgba(252, 0, 255, 0.3);
+        }
+
+        .link-click-count {
+            background: linear-gradient(45deg, #4a00e0, #8e2de2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            min-width: 60px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(142, 45, 226, 0.3);
+        }
+
+        .no-links {
+            text-align: center;
+            padding: 50px 20px;
+            font-size: 1.5rem;
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 10px;
+            border: 2px dashed #ff6b6b;
+        }
+
+        .no-links i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Popup hình ảnh */
+        .image-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .image-popup.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 3px solid #4a00e0;
+            box-shadow: 0 0 30px rgba(74, 0, 224, 0.7);
+            position: relative;
+            animation: popupIn 0.5s ease;
+        }
+
+        @keyframes popupIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .popup-image {
+            font-size: 8rem;
+            margin: 20px 0;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .popup-text {
+            font-size: 1.3rem;
+            margin: 20px 0;
+            color: #a0a0c0;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .popup-close:hover {
+            color: #ff3838;
+        }
+
+        .continue-btn {
+            padding: 12px 30px;
+            background: linear-gradient(45deg, #4a00e0, #8e2de2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .continue-btn:hover {
+            background: linear-gradient(45deg, #8e2de2, #4a00e0);
+            box-shadow: 0 0 15px rgba(142, 45, 226, 0.5);
+        }
+
+        /* Thông báo */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #4a00e0, #8e2de2);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 10001;
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #2d2d4d;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .sheet-menu { flex-direction: column; align-items: center; }
+            .sheet-btn { width: 90%; justify-content: center; }
+            .link-item { flex-direction: column; align-items: flex-start; }
+            .link-click-count { margin-top: 10px; align-self: flex-end; }
+            .popup-image { font-size: 5rem; }
         }
     </style>
 </head>
 <body>
-    <h1>Random Link Generator</h1>
-    <p>Nhấn nút để lấy một link ngẫu nhiên từ từng sheet theo thứ tự</p>
-    <div>
-        <button onclick="getNextRandomLink()">Lấy Link Ngẫu Nhiên</button>
-        <button onclick="refreshData()">Tải lại Dữ liệu</button>
+    <!-- Hiệu ứng hoa anh đào - Giảm 50% -->
+    <div id="sakura-container"></div>
+
+    <!-- Popup hình ảnh -->
+    <div class="image-popup" id="imagePopup">
+        <div class="popup-content">
+            <button class="popup-close" id="closePopup">&times;</button>
+            <div class="popup-image" id="popupEmoji"></div>
+            <div class="popup-text" id="popupText"></div>
+            <button class="continue-btn" id="continueBtn">Tiếp tục đến link</button>
+        </div>
     </div>
-    <div id="result" class="loading">Đang tải dữ liệu từ 4 sheet...</div>
-    <div id="sequence-info" class="info"></div>
+
+    <!-- Thông báo -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Container chính -->
+    <div class="main-container">
+        <header class="header">
+            <h1><i class="fas fa-star"></i> LINK COLLECTION <i class="fas fa-star"></i></h1>
+            <p>Tổng hợp link từ các sheet - Click vào link để xem hình ảnh ngẫu nhiên</p>
+        </header>
+
+        <button class="loading-btn" onclick="refreshData()">
+            <i class="fas fa-sync-alt"></i> LOADING....
+        </button>
+
+        <div id="loading-status" style="text-align: center; margin-bottom: 20px;"></div>
+
+        <div id="menu-container" class="sheet-menu" style="display: none;"></div>
+
+        <div id="sheet-info" style="text-align: center; margin-bottom: 20px; font-size: 1.2rem; color: #8e2de2;"></div>
+
+        <div id="links-container" class="links-container">
+            <div style="text-align: center; padding: 50px; color: #a0a0c0;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 20px;"></i>
+                <p>Chọn một sheet từ menu để xem link</p>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>LINK COLLECTION &copy; 2026 | MY MONEY <i class="fas fa-heart" style="color: #ff6b6b;"></i> I LOVE MONEY</p>
+        </footer>
+    </div>
 
     <script>
         const sheetId = '1wZfmp2X1lCxUyizuIhag7-leS-yxPoQsfpTUuCI0aP0';
@@ -90,17 +433,111 @@
         
         // Tên sheet để hiển thị
         const sheetNames = [
-            'Sheet 1',
-            'Sheet 2', 
-            'Sheet 3',
-            'Sheet 4'
+            'TÙNG',
+            'THẢO', 
+            'DƯƠNG',
+            'HUYỀN'
         ];
         
+        // Icons cho từng sheet
+        const sheetIcons = [
+            'fas fa-tv',
+            'fas fa-film',
+            'fas fa-music',
+            'fas fa-gamepad'
+        ];
+
+        // Danh sách emoji/hình ảnh ngẫu nhiên
+        const randomEmojis = [
+            { emoji: '🍊', name: 'Trái cam' },
+            { emoji: '🐷', name: 'Con lợn' },
+            { emoji: '🐻‍❄️', name: 'Gấu bắc cực' },
+            { emoji: '🐼', name: 'Gấu trúc' },
+            { emoji: '🦊', name: 'Con cáo' },
+            { emoji: '🐰', name: 'Thỏ' },
+            { emoji: '🐨', name: 'Gấu Koala' },
+            { emoji: '🐯', name: 'Hổ' },
+            { emoji: '🦁', name: 'Sư tử' },
+            { emoji: '🐮', name: 'Bò' },
+            { emoji: '🐵', name: 'Khỉ' },
+            { emoji: '🦄', name: 'Kỳ lân' },
+            { emoji: '🐙', name: 'Bạch tuộc' },
+            { emoji: '🦑', name: 'Mực' },
+            { emoji: '🐋', name: 'Cá voi' },
+            { emoji: '🐬', name: 'Cá heo' },
+            { emoji: '🦈', name: 'Cá mập' },
+            { emoji: '🐉', name: 'Rồng' },
+            { emoji: '🦖', name: 'Khủng long' },
+            { emoji: '🍕', name: 'Pizza' },
+            { emoji: '🍔', name: 'Hamburger' },
+            { emoji: '🍣', name: 'Sushi' },
+            { emoji: '🍩', name: 'Donut' },
+            { emoji: '🍦', name: 'Kem' },
+            { emoji: '🎮', name: 'Controller' },
+            { emoji: '🎸', name: 'Guitar' },
+            { emoji: '🎨', name: 'Palette' },
+            { emoji: '🚀', name: 'Tên lửa' },
+            { emoji: '🛸', name: 'UFO' },
+            { emoji: '⭐', name: 'Ngôi sao' },
+            { emoji: '🌈', name: 'Cầu vồng' },
+            { emoji: '🔥', name: 'Lửa' },
+            { emoji: '💎', name: 'Kim cương' },
+            { emoji: '👑', name: 'Vương miện' },
+            { emoji: '🎭', name: 'Mặt nạ' },
+            { emoji: '🎪', name: 'Rạp xiếc' },
+            { emoji: '🏆', name: 'Cúp' },
+            { emoji: '🎯', name: 'Bia tập bắn' },
+            { emoji: '🎲', name: 'Xúc xắc' },
+            { emoji: '♠️', name: 'Spade' },
+            { emoji: '♥️', name: 'Heart' },
+            { emoji: '♦️', name: 'Diamond' },
+            { emoji: '♣️', name: 'Club' }
+        ];
+
         // Lưu trữ link từ từng sheet riêng biệt
         let sheetLinks = [];
         let loadingComplete = false;
-        let currentSheetIndex = 0;
-        let clickCount = 0;
+        let currentSheetIndex = -1;
+        let clickCounts = {};
+        let currentLinkToOpen = '';
+
+        // Tạo hiệu ứng hoa anh đào - GIẢM 50% SỐ LƯỢNG
+        function createSakura() {
+            const container = document.getElementById('sakura-container');
+            const sakuraCount = 7; // GIẢM TỪ 15 XUỐNG 7 (khoảng 50%)
+            
+            for (let i = 0; i < sakuraCount; i++) {
+                const sakura = document.createElement('div');
+                sakura.className = 'sakura';
+                sakura.innerHTML = '❀';
+                
+                // Vị trí ngẫu nhiên
+                sakura.style.left = Math.random() * 100 + 'vw';
+                
+                // Kích thước ngẫu nhiên (nhỏ hơn)
+                const size = Math.random() * 8 + 8; // Giảm kích thước
+                sakura.style.fontSize = size + 'px';
+                
+                // Tốc độ rơi ngẫu nhiên (chậm hơn)
+                const duration = Math.random() * 15 + 15; // Tăng thời gian rơi
+                sakura.style.animationDuration = duration + 's';
+                
+                // Delay ngẫu nhiên
+                sakura.style.animationDelay = Math.random() * 3 + 's'; // Giảm delay
+                
+                container.appendChild(sakura);
+                
+                // Xóa hoa sau khi rơi xong
+                setTimeout(() => {
+                    if (sakura.parentNode === container) {
+                        sakura.remove();
+                    }
+                }, duration * 1000);
+            }
+        }
+
+        // Tạo hoa anh đào liên tục - TĂNG THỜI GIAN INTERVAL (giảm tần suất)
+        setInterval(createSakura, 1500); // Tăng từ 1000ms lên 1500ms
 
         // Hàm fetch dữ liệu từ một sheet cụ thể
         async function fetchSheetData(gid, sheetIndex) {
@@ -171,7 +608,12 @@
 
         // Tải dữ liệu từ tất cả sheet
         async function loadAllSheets() {
-            document.getElementById('result').innerHTML = '<div class="loading">Đang tải dữ liệu từ 4 sheet...</div>';
+            const loadingBtn = document.querySelector('.loading-btn');
+            const originalText = loadingBtn.innerHTML;
+            loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ĐANG TẢI DỮ LIỆU...';
+            loadingBtn.disabled = true;
+            
+            document.getElementById('loading-status').innerHTML = '<div style="color: #8e2de2;"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu từ 4 sheet...</div>';
             
             const promises = sheetGids.map((gid, index) => 
                 fetchSheetData(gid, index)
@@ -196,105 +638,241 @@
                     }
                 });
                 
-                console.log(`Tổng cộng: ${totalLinks} link từ ${successCount}/4 sheet thành công`);
+                // Tải số lần click từ localStorage
+                loadClickCounts();
                 
                 if (totalLinks === 0) {
-                    document.getElementById('result').innerHTML = 
-                        '<div class="error">Không tìm thấy link nào trong các sheet.</div>';
+                    document.getElementById('loading-status').innerHTML = 
+                        '<div style="color: #ff6b6b;"><i class="fas fa-exclamation-triangle"></i> Không tìm thấy link nào trong các sheet.</div>';
                     loadingComplete = false;
                 } else {
-                    document.getElementById('result').innerHTML = 
-                        `<div class="success">Đã tải ${totalLinks} link từ ${successCount} sheet thành công!</div>
-                         <div class="loading">Nhấn "Lấy Link Ngẫu Nhiên" để bắt đầu.</div>`;
+                    document.getElementById('loading-status').innerHTML = 
+                        `<div style="color: #00dbde;"><i class="fas fa-check-circle"></i> Đã tải ${totalLinks} link từ ${successCount} sheet thành công!</div>`;
                     loadingComplete = true;
                     
-                    // Hiển thị thông tin số lượng link trong từng sheet
-                    updateSequenceInfo();
+                    // Tạo menu chọn sheet
+                    createSheetMenu();
+                    
+                    // Hiển thị sheet đầu tiên có link
+                    showFirstSheetWithLinks();
                 }
             } catch (error) {
                 console.error('Lỗi khi tải dữ liệu:', error);
-                document.getElementById('result').innerHTML = 
-                    `<div class="error">Lỗi khi tải dữ liệu: ${error.message}</div>`;
+                document.getElementById('loading-status').innerHTML = 
+                    `<div style="color: #ff6b6b;"><i class="fas fa-exclamation-triangle"></i> Lỗi khi tải dữ liệu: ${error.message}</div>`;
                 loadingComplete = false;
+            } finally {
+                loadingBtn.innerHTML = originalText;
+                loadingBtn.disabled = false;
             }
         }
 
-        // Lấy link ngẫu nhiên từ sheet tiếp theo
-        function getNextRandomLink() {
-            if (!loadingComplete) {
-                document.getElementById('result').innerHTML = 
-                    '<div class="loading">Đang tải dữ liệu... Vui lòng đợi hoặc nhấn "Tải lại Dữ liệu".</div>';
+        // Tạo menu chọn sheet
+        function createSheetMenu() {
+            const menuContainer = document.getElementById('menu-container');
+            menuContainer.innerHTML = '';
+            menuContainer.style.display = 'flex';
+            
+            for (let i = 0; i < sheetNames.length; i++) {
+                const button = document.createElement('button');
+                button.className = 'sheet-btn';
+                button.dataset.sheetIndex = i;
+                
+                const icon = document.createElement('i');
+                icon.className = sheetIcons[i];
+                
+                const text = document.createTextNode(sheetNames[i]);
+                
+                const countSpan = document.createElement('span');
+                countSpan.className = 'sheet-count';
+                const linkCount = sheetLinks[i] ? sheetLinks[i].length : 0;
+                countSpan.textContent = linkCount;
+                
+                button.appendChild(icon);
+                button.appendChild(text);
+                button.appendChild(countSpan);
+                
+                button.addEventListener('click', function() {
+                    selectSheet(i);
+                });
+                
+                menuContainer.appendChild(button);
+            }
+        }
+
+        // Chọn sheet để hiển thị
+        function selectSheet(sheetIndex) {
+            currentSheetIndex = sheetIndex;
+            
+            // Cập nhật trạng thái active của nút
+            const buttons = document.querySelectorAll('.sheet-btn');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+                if (parseInt(button.dataset.sheetIndex) === sheetIndex) {
+                    button.classList.add('active');
+                }
+            });
+            
+            // Cập nhật thông tin sheet
+            document.getElementById('sheet-info').innerHTML = 
+                `<i class="${sheetIcons[sheetIndex]}"></i> Đang hiển thị: <span style="color: #fc00ff;">${sheetNames[sheetIndex]}</span>`;
+            
+            // Hiển thị link của sheet được chọn
+            displaySheetLinks(sheetIndex);
+        }
+
+        // Tải số lần click từ localStorage
+        function loadClickCounts() {
+            const savedCounts = localStorage.getItem('linkClickCounts');
+            if (savedCounts) {
+                clickCounts = JSON.parse(savedCounts);
+            }
+        }
+
+        // Lưu số lần click vào localStorage
+        function saveClickCounts() {
+            localStorage.setItem('linkClickCounts', JSON.stringify(clickCounts));
+        }
+
+        // Tăng số lần click cho một link
+        function incrementClickCount(link) {
+            if (!clickCounts[link]) {
+                clickCounts[link] = 0;
+            }
+            clickCounts[link]++;
+            saveClickCounts();
+            return clickCounts[link];
+        }
+
+        // Hiển thị link của sheet
+        function displaySheetLinks(sheetIndex) {
+            const linksContainer = document.getElementById('links-container');
+            const links = sheetLinks[sheetIndex];
+            
+            if (!links || links.length === 0) {
+                linksContainer.innerHTML = `
+                    <div class="no-links">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>THÊM LINK VÀO ĐÂY NHAH</div>
+                        <p style="margin-top: 10px; font-size: 1rem;">Sheet này chưa có link nào!</p>
+                    </div>
+                `;
                 return;
             }
             
-            let attempts = 0;
-            let foundLink = false;
+            let html = '';
             
-            // Tìm sheet có link
-            while (attempts < sheetLinks.length) {
-                const links = sheetLinks[currentSheetIndex];
+            links.forEach((link, index) => {
+                const clickCount = clickCounts[link] || 0;
                 
-                if (links && links.length > 0) {
-                    // Lấy link ngẫu nhiên từ sheet hiện tại
-                    const randomIndex = Math.floor(Math.random() * links.length);
-                    const randomLink = links[randomIndex];
-                    
-                    document.getElementById('result').innerHTML = 
-                        `<div class="link-container">
-                            <a href="${randomLink}" target="_blank">${randomLink}</a>
-                        </div>`;
-                    
-                    // Tăng số lần click và cập nhật sheet tiếp theo
-                    clickCount++;
-                    
-                    // Chuyển đến sheet tiếp theo
-                    currentSheetIndex = (currentSheetIndex + 1) % sheetLinks.length;
-                    foundLink = true;
-                    break;
-                } else {
-                    // Sheet này không có link, chuyển sang sheet tiếp theo
-                    currentSheetIndex = (currentSheetIndex + 1) % sheetLinks.length;
-                    attempts++;
+                html += `
+                    <div class="link-item">
+                        <a href="#" data-link="${link}">${link}</a>
+                        <div class="link-click-count">
+                            <i class="fas fa-mouse-pointer"></i> ${clickCount}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            linksContainer.innerHTML = html;
+            
+            // Thêm event listener cho các link
+            const linkElements = linksContainer.querySelectorAll('.link-item a');
+            linkElements.forEach(linkElement => {
+                linkElement.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const link = this.getAttribute('data-link');
+                    showRandomImagePopup(link);
+                });
+            });
+        }
+
+        // Hiển thị popup hình ảnh ngẫu nhiên
+        function showRandomImagePopup(link) {
+            // Tăng số lần click
+            const newCount = incrementClickCount(link);
+            
+            // Cập nhật hiển thị số lần click
+            const linkElements = document.querySelectorAll('.link-item a');
+            linkElements.forEach(linkElement => {
+                if (linkElement.getAttribute('data-link') === link) {
+                    const countElement = linkElement.parentElement.querySelector('.link-click-count');
+                    countElement.innerHTML = `<i class="fas fa-mouse-pointer"></i> ${newCount}`;
+                }
+            });
+            
+            // Lấy hình ảnh ngẫu nhiên
+            const randomIndex = Math.floor(Math.random() * randomEmojis.length);
+            const randomEmoji = randomEmojis[randomIndex];
+            
+            // Cập nhật popup
+            document.getElementById('popupEmoji').textContent = randomEmoji.emoji;
+            document.getElementById('popupText').textContent = `Bạn đã nhận được: ${randomEmoji.name}!`;
+            
+            // Lưu link để mở sau
+            currentLinkToOpen = link;
+            
+            // Hiển thị popup
+            document.getElementById('imagePopup').classList.add('active');
+            
+            // Hiển thị thông báo
+            showNotification(`Bạn đã nhận được ${randomEmoji.name}!`);
+        }
+
+        // Hiển thị thông báo
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Hiển thị sheet đầu tiên có link
+        function showFirstSheetWithLinks() {
+            for (let i = 0; i < sheetLinks.length; i++) {
+                if (sheetLinks[i] && sheetLinks[i].length > 0) {
+                    selectSheet(i);
+                    return;
                 }
             }
             
-            if (!foundLink) {
-                document.getElementById('result').innerHTML = 
-                    '<div class="error">Không tìm thấy link nào trong tất cả các sheet.</div>';
-                // Reset về sheet đầu tiên
-                currentSheetIndex = 0;
+            // Nếu không có sheet nào có link, hiển thị sheet đầu tiên
+            if (sheetLinks.length > 0) {
+                selectSheet(0);
             }
-            
-            updateSequenceInfo();
-        }
-
-        // Cập nhật thông tin trình tự
-        function updateSequenceInfo() {
-            let infoHtml = `<div class="info">`;
-            
-            for (let i = 0; i < sheetLinks.length; i++) {
-                const linkCount = sheetLinks[i] ? sheetLinks[i].length : 0;
-                const isCurrent = (i === currentSheetIndex);
-                
-                infoHtml += `<span style="margin: 0 10px; ${isCurrent ? 'font-weight: bold; color: #007bff;' : ''}">
-                    ${sheetNames[i]}: ${linkCount} link
-                </span>`;
-            }
-            
-            infoHtml += `<br>Lần click tiếp theo: ${sheetNames[currentSheetIndex]}</div>`;
-            document.getElementById('sequence-info').innerHTML = infoHtml;
         }
 
         // Làm mới dữ liệu
         function refreshData() {
             loadingComplete = false;
-            currentSheetIndex = 0;
-            clickCount = 0;
+            document.getElementById('menu-container').style.display = 'none';
+            document.getElementById('sheet-info').innerHTML = '';
             loadAllSheets();
         }
 
+        // Đóng popup
+        document.getElementById('closePopup').addEventListener('click', function() {
+            document.getElementById('imagePopup').classList.remove('active');
+        });
+
+        // Tiếp tục đến link
+        document.getElementById('continueBtn').addEventListener('click', function() {
+            if (currentLinkToOpen) {
+                window.open(currentLinkToOpen, '_blank');
+                document.getElementById('imagePopup').classList.remove('active');
+            }
+        });
+
         // Tự động tải dữ liệu khi trang được tải
         window.onload = function() {
+            // Bắt đầu hiệu ứng hoa anh đào
+            createSakura();
+            
+            // Tải dữ liệu
             loadAllSheets();
         };
     </script>
